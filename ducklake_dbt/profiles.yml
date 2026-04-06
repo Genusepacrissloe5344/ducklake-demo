@@ -1,0 +1,53 @@
+ducklake_dbt:
+  target: dev
+  outputs:
+    # Single-player: SQLite catalog, no Postgres needed
+    sp:
+      type: duckdb
+      path: ":memory:"
+      schema: stg
+      database: dev_analytics
+      extensions:
+        - ducklake
+        - httpfs
+      secrets:
+        - type: s3
+          key_id: "{{ env_var('AWS_ACCESS_KEY_ID') }}"
+          secret: "{{ env_var('AWS_SECRET_ACCESS_KEY') }}"
+          session_token: "{{ env_var('AWS_SESSION_TOKEN', '') }}"
+          region: "{{ env_var('AWS_REGION') }}"
+      attach:
+        - path: "ducklake:sqlite:{{ env_var('DUCKLAKE_CATALOG_PATH') }}"
+          alias: raw
+          read_only: true
+        - path: "ducklake:sqlite:{{ env_var('DUCKLAKE_CATALOG_PATH') }}"
+          alias: dev_analytics
+
+    # Multiplayer: Postgres catalog (requires PG_CONN env var)
+    dev:
+      type: duckdb
+      path: ":memory:"
+      schema: stg
+      database: dev_analytics
+      extensions:
+        - ducklake
+        - postgres
+        - httpfs
+      secrets:
+        - type: s3
+          key_id: "{{ env_var('AWS_ACCESS_KEY_ID') }}"
+          secret: "{{ env_var('AWS_SECRET_ACCESS_KEY') }}"
+          session_token: "{{ env_var('AWS_SESSION_TOKEN', '') }}"
+          region: "{{ env_var('AWS_REGION') }}"
+      attach:
+        - path: "ducklake:postgres:{{ env_var('PG_CONN') }}"
+          alias: raw
+          read_only: true
+          options:
+            DATA_PATH: "s3://{{ env_var('S3_BUCKET') }}/{{ env_var('S3_PATH', 'ducklake') }}/raw/"
+            METADATA_SCHEMA: raw
+        - path: "ducklake:postgres:{{ env_var('PG_CONN') }}"
+          alias: dev_analytics
+          options:
+            DATA_PATH: "s3://{{ env_var('S3_BUCKET') }}/{{ env_var('S3_PATH', 'ducklake') }}/dev_analytics/"
+            METADATA_SCHEMA: dev_analytics
