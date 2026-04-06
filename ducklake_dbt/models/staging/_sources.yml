@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: raw
     database: raw
-    schema: main
+    schema: "{{ 'raw_data' if target.name == 'sp' else 'main' }}"
     tables:
       - name: users
       - name: events

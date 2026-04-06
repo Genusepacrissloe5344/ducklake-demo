@@ -60,16 +60,21 @@ if creds.token:
     os.environ["SOURCES__FILESYSTEM__CREDENTIALS__AWS_SESSION_TOKEN"] = creds.token
 
 # ── DuckLake destination ─────────────────────────────────────────────
+# Single-player: one catalog, so data_path is the root; schema "raw" creates the raw/ prefix.
+# Multiplayer: separate catalog per layer with its own data_path; schema stays "main".
+STORAGE_URL = f"s3://{S3_BUCKET}/{S3_PATH}/" if SINGLE_PLAYER else f"s3://{S3_BUCKET}/{S3_PATH}/raw/"
+DATASET_NAME = "raw_data" if SINGLE_PLAYER else "main"
+
 dl_credentials = DuckLakeCredentials(
     "raw",
     catalog=CATALOG_URL,
-    storage=f"s3://{S3_BUCKET}/{S3_PATH}/raw/",
+    storage=STORAGE_URL,
 )
 
 pipeline = dlt.pipeline(
-    pipeline_name="raw_load",
+    pipeline_name=f"raw_load_{S3_PATH}",
     destination=dlt.destinations.ducklake(credentials=dl_credentials),
-    dataset_name="main",
+    dataset_name=DATASET_NAME,
 )
 
 # ── Users: always replace (stable dimension) ─────────────────────────
@@ -100,7 +105,7 @@ if __name__ == "__main__":
     print(f"Loading source parquets into DuckLake RAW layer via dlt [{mode}]...")
     print(f"  Source  : {LANDING_PATH}/")
     print(f"  Catalog : {CATALOG_DISPLAY}")
-    print(f"  Storage : s3://{S3_BUCKET}/{S3_PATH}/raw/")
+    print(f"  Storage : {STORAGE_URL}")
     print()
 
     info = pipeline.run(
@@ -110,4 +115,4 @@ if __name__ == "__main__":
     print(info)
     print("\nDone! Data is in the DuckLake RAW layer.")
     print(f"  Catalog: {CATALOG_DISPLAY}")
-    print(f"  Data files: s3://{S3_BUCKET}/{S3_PATH}/raw/")
+    print(f"  Data files: {STORAGE_URL}")
