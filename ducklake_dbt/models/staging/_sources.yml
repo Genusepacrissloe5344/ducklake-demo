@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: raw
+    database: raw
+    schema: main
+    tables:
+      - name: users
+      - name: events
+      - name: invoices
+      - name: support_tickets

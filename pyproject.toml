@@ -1,0 +1,17 @@
+[project]
+name = "ducklake"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiobotocore>=3.3.0",
+    "boto3",
+    "dbt-duckdb>=1.10.1",
+    "dlt[duckdb,ducklake]>=1.24.0",
+    "duckdb>=1.5.1",
+    "numpy>=2.4.4",
+    "python-dotenv>=1.2.2",
+    "pytz>=2026.1.post1",
+    "s3fs>=2026.3.0",
+]

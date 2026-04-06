@@ -1,3 +1,10 @@
 .env
 *.duckdb
 .venv/
+aws/
+connect.sql
+logs/
+data/
+*.sqlite
+lake_catalog.*
+.dlt/
