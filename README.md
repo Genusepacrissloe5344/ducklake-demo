@@ -27,11 +27,11 @@ This project demonstrates a realistic ELT pipeline where raw data lands as parqu
      (source sim)        │   ├── invoices.parquet    ├── (parquet)      │
                          │   └── support_tickets     └── ...            │
                          │          .parquet                            │
-                         └─────────┬────────────────────────┬────────────┘
+                         └─────────┬────────────────────────┬───────────┘
                                    │                        │
                                    │ read                   │ write
                                    ▼                        │
-                         ┌─────────────────────┐  ┌─────────┴─────────┐
+                         ┌───────────────── ────┐  ┌─────────┴─────────┐
                          │   dlt (ingestion)    │  │  dbt (transform)  │
                          │                      │  │                   │
                          │  load_raw.py         │  │  staging (views)  │
@@ -42,12 +42,12 @@ This project demonstrates a realistic ELT pipeline where raw data lands as parqu
                                     │                        │
                                     │ catalog ops            │ catalog ops
                                     ▼                        │
-                         ┌───────────────────────────────────┐
+                         ┌──────────────────────────-─────────┐
                          │    Neon Postgres (Metadata DB)     │
                          │                                    │
-                         │  schema: raw          (DuckLake)  │
-                         │  schema: dev_analytics (DuckLake) │
-                         └───────────────────────────────────┘
+                         │  schema: raw          (DuckLake)   │
+                         │  schema: dev_analytics (DuckLake)  │
+                         └────────────────────────────────────┘
 ```
 
 **Data flows through three distinct stages:**

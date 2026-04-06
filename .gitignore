@@ -4,7 +4,8 @@
 aws/
 connect.sql
 logs/
-data/
 *.sqlite
+*.db
 lake_catalog.*
+ducklake_catalog.*
 .dlt/

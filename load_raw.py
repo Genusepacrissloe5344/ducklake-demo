@@ -2,8 +2,11 @@
 
 This is the "ingestion" step — analogous to Fivetran landing data in
 Snowflake's RAW schema.  It reads parquet files from s3://<bucket>/events_landing/
-and writes them to the DuckLake (Postgres catalog + S3 storage) using dlt's
-native ducklake destination.
+and writes them to the DuckLake using dlt's native ducklake destination.
+
+Supports two modes:
+  - Multiplayer (default): Postgres catalog + S3 storage
+  - Single-player (SINGLE_PLAYER=true): SQLite catalog + S3 storage
 
 Incremental: dlt tracks which files have already been loaded by modification_date.
 Only new files are loaded on subsequent runs. Users are always fully replaced.
@@ -26,9 +29,17 @@ load_dotenv()
 AWS_PROFILE = os.environ["AWS_PROFILE"]
 AWS_REGION = os.environ["AWS_REGION"]
 S3_BUCKET = os.environ["S3_BUCKET"]
-S3_PATH = os.environ.get("S3_PATH", "ducklake")  # subfolder in bucket for DuckLake data
-PG_URL = os.environ["PG_URL"]
+SINGLE_PLAYER = os.environ.get("SINGLE_PLAYER", "false").lower() == "true"
 LANDING_PATH = f"s3://{S3_BUCKET}/events_landing"
+
+S3_PATH = os.environ.get("S3_PATH", "ducklake-sp" if SINGLE_PLAYER else "ducklake")
+
+if SINGLE_PLAYER:
+    CATALOG_URL = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'ducklake_catalog.db')}"
+    CATALOG_DISPLAY = "sqlite:///ducklake_catalog.db (single-player)"
+else:
+    CATALOG_URL = os.environ["PG_URL"]
+    CATALOG_DISPLAY = CATALOG_URL.split("@")[1] if "@" in CATALOG_URL else CATALOG_URL
 
 # ── Resolve AWS SSO creds via boto3 ──────────────────────────────────
 session = boto3.Session(profile_name=AWS_PROFILE)
@@ -51,7 +62,7 @@ if creds.token:
 # ── DuckLake destination ─────────────────────────────────────────────
 dl_credentials = DuckLakeCredentials(
     "raw",
-    catalog=PG_URL,
+    catalog=CATALOG_URL,
     storage=f"s3://{S3_BUCKET}/{S3_PATH}/raw/",
 )
 
@@ -85,9 +96,10 @@ for table in ACTIVITY_TABLES:
 
 # ── Run ──────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    print("Loading source parquets from S3 landing zone into DuckLake RAW layer via dlt...")
+    mode = "single-player (SQLite)" if SINGLE_PLAYER else "multiplayer (Postgres)"
+    print(f"Loading source parquets into DuckLake RAW layer via dlt [{mode}]...")
     print(f"  Source  : {LANDING_PATH}/")
-    print(f"  Catalog : {PG_URL.split('@')[1] if '@' in PG_URL else PG_URL}")
+    print(f"  Catalog : {CATALOG_DISPLAY}")
     print(f"  Storage : s3://{S3_BUCKET}/{S3_PATH}/raw/")
     print()
 
@@ -97,5 +109,5 @@ if __name__ == "__main__":
 
     print(info)
     print("\nDone! Data is in the DuckLake RAW layer.")
-    print("  Catalog metadata: Postgres (schema: raw)")
+    print(f"  Catalog: {CATALOG_DISPLAY}")
     print(f"  Data files: s3://{S3_BUCKET}/{S3_PATH}/raw/")
